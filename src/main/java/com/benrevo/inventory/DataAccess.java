@@ -13,13 +13,13 @@ import java.util.TimerTask;
  *
  * @author John Hurst
  */
-class DataAccess {
+public class DataAccess {
     private Connection conn;
 
     /**
      * Initiate connection to database
      */
-    DataAccess() {
+    public DataAccess() {
         setConnection();
         activatePersistence();
     }
@@ -71,7 +71,7 @@ class DataAccess {
      * @param password Requested password
      * @throws SQLException Throws if username already exists, SQL is malformed, or the connection is invalid
      */
-    void addUser(String username, String password) throws SQLException {
+    public void addUser(String username, String password) throws SQLException {
         String sql = "INSERT INTO users VALUES (?, ?)";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, username);
@@ -85,7 +85,7 @@ class DataAccess {
      * @return              JSON Object representing the requested user
      * @throws SQLException Throws if SQL is malformed or if connection is invalid
      */
-    JSONObject getUser(String username) throws SQLException {
+    public JSONObject getUser(String username) throws SQLException {
         String sql = "SELECT username, password FROM users WHERE username = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, username);
@@ -105,7 +105,7 @@ class DataAccess {
      * @return True if username matches with password
      * @throws SQLException Throws if SQL is malformed or if connection is invalid
      */
-    boolean login(String username, String password) throws SQLException {
+    public boolean login(String username, String password) throws SQLException {
         String sql = "SELECT COUNT(*) FROM users WHERE username = ? AND password = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, username);
@@ -120,7 +120,7 @@ class DataAccess {
      * @return JSONArray representing inventory
      * @throws SQLException Throws if SQL is malformed or if connection is invalid
      */
-    JSONArray getInventory(String username) throws SQLException {
+    public JSONArray getInventory(String username) throws SQLException {
         String sql = "SELECT id, productname, amount FROM inventory WHERE userid IN " +
                 "(SELECT id FROM users WHERE username = ?)";
         PreparedStatement ps = conn.prepareStatement(sql);
@@ -142,7 +142,7 @@ class DataAccess {
      * @param items JSON Array containing items to update
      * @throws SQLException Throws if SQL is malformed or if connection is invalid
      */
-    void updateItem(JSONArray items) throws SQLException {
+    public void updateItem(JSONArray items) throws SQLException {
         String sql = "UPDATE inventory SET productname = ?, amount = ? WHERE id = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
         int count = 1;
@@ -165,7 +165,7 @@ class DataAccess {
      * @param id id of item to delete
      * @throws SQLException Throws if SQL is malformed or if connection is invalid
      */
-    void deleteItem(int id) throws SQLException {
+    public void deleteItem(int id) throws SQLException {
         String sql = "DELETE FROM inventory WHERE id = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, id);
@@ -179,7 +179,7 @@ class DataAccess {
      * @param username      User that inventory item corresponds to
      * @throws SQLException Throws if SQL is malformed or if connection is invalid
      */
-    Integer addItem(String name, int amount, String username) throws SQLException {
+    public Integer addItem(String name, int amount, String username) throws SQLException {
         String sql = "INSERT INTO inventory (productname, amount, userid) " +
                 "SELECT ?, ?, id FROM users WHERE username = ?";
         PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -192,5 +192,36 @@ class DataAccess {
             return rs.getInt(1);
         }
         return 0;
+    }
+
+    public void cleanDatabase() throws SQLException {
+        cleanInventory();
+        cleanUsers();
+    }
+
+    public void cleanInventory() throws SQLException {
+        boolean autoCommit = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+        String deleteInventory = "DELETE FROM inventory";
+        String alterSeq = "ALTER SEQUENCE inventory_id_seq RESTART WITH 1";
+        PreparedStatement ps = conn.prepareStatement(deleteInventory);
+        ps.execute();
+        ps = conn.prepareStatement(alterSeq);
+        ps.execute();
+        conn.commit();
+        conn.setAutoCommit(autoCommit);
+    }
+
+    public void cleanUsers() throws SQLException {
+        boolean autoCommit = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+        String deleteUsers = "DELETE FROM users";
+        String alterSeq = "ALTER SEQUENCE users_id_seq RESTART WITH 1";
+        PreparedStatement ps = conn.prepareStatement(deleteUsers);
+        ps.execute();
+        ps = conn.prepareStatement(alterSeq);
+        ps.execute();
+        conn.commit();
+        conn.setAutoCommit(autoCommit);
     }
 }
