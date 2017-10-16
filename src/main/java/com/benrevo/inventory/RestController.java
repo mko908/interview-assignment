@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.crypto.Data;
 import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.Base64;
@@ -18,6 +19,8 @@ import java.util.Base64;
 @org.springframework.web.bind.annotation.RestController
 public class RestController {
 
+    private DataAccess dataAccess = new DataAccess();
+    
     private final ResponseEntity SERVER_ERROR = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(null);
 
@@ -38,7 +41,7 @@ public class RestController {
      * @throws SQLException Throws if DataAccess runs into an error
      */
     private boolean checkAuth(String user, String hash) throws SQLException {
-        JSONObject userObj = InventoryManagementApplication.dataAccess.getUser(user);
+        JSONObject userObj = dataAccess.getUser(user);
         String userHash = Base64.getEncoder().encodeToString(
                 DigestUtils.getSha512Digest().digest(
                         (user + userObj.getString(PASSWORD)).getBytes()));
@@ -55,7 +58,7 @@ public class RestController {
     public ResponseEntity register(@RequestBody String body) {
         try {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
-            InventoryManagementApplication.dataAccess.addUser(bodyObj.getString(USERNAME),
+            dataAccess.addUser(bodyObj.getString(USERNAME),
                     bodyObj.getString(PASSWORD));
             JSONObject rObj = new JSONObject();
             rObj.put("auth", Base64.getEncoder().encodeToString(
@@ -81,9 +84,9 @@ public class RestController {
     public ResponseEntity login(@RequestBody String body) {
         try {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
-            if (InventoryManagementApplication.dataAccess.login(bodyObj.getString(USERNAME),
+            if (dataAccess.login(bodyObj.getString(USERNAME),
                     bodyObj.getString(PASSWORD))) {
-                JSONArray inventory = InventoryManagementApplication.dataAccess.getInventory(
+                JSONArray inventory = dataAccess.getInventory(
                         bodyObj.getString(USERNAME));
                 JSONObject rObj = new JSONObject();
                 rObj.put("data", inventory);
@@ -113,7 +116,7 @@ public class RestController {
         try {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
             if (checkAuth(bodyObj.getString(USERNAME), auth)) {
-                int id = InventoryManagementApplication.dataAccess.addItem(
+                int id = dataAccess.addItem(
                         bodyObj.getString("name"), bodyObj.getInt("amount"), bodyObj.getString(USERNAME));
                 JSONObject rObj = new JSONObject();
                 rObj.put("id", id);
@@ -140,7 +143,7 @@ public class RestController {
         try {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
             if (checkAuth(bodyObj.getString(USERNAME), auth)) {
-                InventoryManagementApplication.dataAccess.updateItem(bodyObj.getJSONArray("data"));
+                dataAccess.updateItem(bodyObj.getJSONArray("data"));
                 return ResponseEntity.noContent().build();
             } else {
                 return UNAUTHORIZED;
@@ -164,7 +167,7 @@ public class RestController {
         try {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
             if (checkAuth(bodyObj.getString(USERNAME), auth)) {
-                InventoryManagementApplication.dataAccess.deleteItem(bodyObj.getInt("id"));
+                dataAccess.deleteItem(bodyObj.getInt("id"));
                 return ResponseEntity.noContent().build();
             } else {
                 return UNAUTHORIZED;
