@@ -1,5 +1,5 @@
 # Interview Assignment
-###Rest Api Documentation
+### Rest Api Documentation
 * Login (POST):
     * Returns a hash for authentication and the current inventory
     * Json: {"username":String, "password":String}
