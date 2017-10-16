@@ -144,7 +144,7 @@ public class RestController {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
             if (checkAuth(bodyObj.getString(USERNAME), auth)) {
                 InventoryManagementApplication.dataAccess.updateItem(bodyObj.getJSONArray("data"));
-                return ResponseEntity.ok(null);
+                return ResponseEntity.noContent().build();
             } else {
                 return UNAUTHORIZED;
             }
@@ -168,7 +168,7 @@ public class RestController {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
             if (checkAuth(bodyObj.getString(USERNAME), auth)) {
                 InventoryManagementApplication.dataAccess.deleteItem(bodyObj.getInt("id"));
-                return ResponseEntity.ok(null);
+                return ResponseEntity.noContent().build();
             } else {
                 return UNAUTHORIZED;
             }
