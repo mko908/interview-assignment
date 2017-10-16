@@ -57,10 +57,7 @@ public class RestController {
             JSONObject bodyObj = new JSONObject(URLDecoder.decode(body, "UTF-8"));
             InventoryManagementApplication.dataAccess.addUser(bodyObj.getString(USERNAME),
                     bodyObj.getString(PASSWORD));
-            JSONArray inventory = InventoryManagementApplication.dataAccess.getInventory(
-                    bodyObj.getString(USERNAME));
             JSONObject rObj = new JSONObject();
-            rObj.put("data", inventory);
             rObj.put("auth", Base64.getEncoder().encodeToString(
                     DigestUtils.getSha512Digest().digest(
                             (bodyObj.getString(USERNAME) + bodyObj.getString(PASSWORD)).getBytes())));
