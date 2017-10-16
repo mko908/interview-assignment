@@ -194,11 +194,19 @@ public class DataAccess {
         return 0;
     }
 
+    /**
+     * Cleans entire database and resets id sequences
+     * @throws SQLException Throws if SQL is malformed or if connection is invalid
+     */
     public void cleanDatabase() throws SQLException {
         cleanInventory();
         cleanUsers();
     }
 
+    /**
+     * Cleans inventory table and resets id sequence
+     * @throws SQLException Throws if SQL is malformed or if connection is invalid
+     */
     public void cleanInventory() throws SQLException {
         boolean autoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
@@ -212,6 +220,10 @@ public class DataAccess {
         conn.setAutoCommit(autoCommit);
     }
 
+    /**
+     * Cleans users table and resets id sequence
+     * @throws SQLException Throws if SQL is malformed or if connection is invalid
+     */
     public void cleanUsers() throws SQLException {
         boolean autoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);

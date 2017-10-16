@@ -106,9 +106,9 @@ public class RestTest {
 
         JSONArray expectedInventory = new JSONArray()
                 .put(new JSONObject()
-                        .put("id", 1)
-                        .put("name", "apples")
-                        .put("amount", 4));
+                    .put("id", 1)
+                    .put("name", "apples")
+                    .put("amount", 4));
         assert dataAccess.getInventory(authTestObj.getString("username")).toString().equals(expectedInventory.toString());
     }
 
